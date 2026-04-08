@@ -293,6 +293,8 @@
         /* ─────────── FOOTER ─────────── */
         .footer { padding: 40px; text-align: center; border-top: 1px solid var(--border); color: var(--text-dim); margin-top: 100px; background: #000;}
 
+        /* ─────────── CONFETTI ─────────── */
+        .confetti-piece { position: fixed; pointer-events: none; z-index: 10001; }
     </style>
 </head>
 
@@ -553,6 +555,31 @@
             return el ? el.dataset.val : "0";
         }
 
+        // Confetti Logic
+        const COLORS = ['#caff4a', '#a2d62a', '#ffffff', '#ffdd57', '#57c7ff', '#ff6bcb', '#ff9f43'];
+        function fireConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-piece';
+                const size = 6 + Math.random() * 9;
+                p.style.cssText = `
+                    left:${Math.random() * 100}vw; top:-20px;
+                    width:${size}px; height:${size}px;
+                    background:${COLORS[Math.floor(Math.random() * COLORS.length)]};
+                    border-radius:${Math.random() > 0.5 ? '50%' : '3px'};
+                `;
+                document.body.appendChild(p);
+                const dur = 1800 + Math.random() * 1500;
+                const delay = Math.random() * 700;
+                const dx = (Math.random() - 0.5) * 280;
+                p.animate([
+                    { top: '-20px', opacity: 1, transform: `rotate(0deg) translateX(0)` },
+                    { top: '110vh', opacity: 0, transform: `rotate(${360 + Math.random() * 360}deg) translateX(${dx}px)` }
+                ], { duration: dur, delay, easing: 'ease-in', fill: 'forwards' });
+                setTimeout(() => p.remove(), dur + delay + 100);
+            }
+        }
+
         // Main Predict Function
         async function predict() {
             const btn = document.getElementById('predict-btn');
@@ -604,6 +631,7 @@
                 document.getElementById('res-high-inr').innerText = '₹' + data.price_high_inr.toLocaleString();
 
                 document.getElementById('result-overlay').classList.add('show');
+                setTimeout(fireConfetti, 100);
 
             } catch (err) {
                 console.error(err);
