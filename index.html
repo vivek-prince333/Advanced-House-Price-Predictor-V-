@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>House Price Prediction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #050605;
+            --card: rgba(15, 18, 15, 0.7);
+            --card-solid: #151815;
+            --border: #282f28;
+            --accent: #caff4a;
+            --accent2: #a2d62a;
+            --text: #ffffff;
+            --text-muted: #8e9e8a;
+            --text-dim: #4f5a4c;
+            --radius-lg: 24px;
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            letter-spacing: 0.3px;
+        }
+
+        /* ─────────── SPLASH + SMASH ANIMATION ─────────── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .splash-images {
+            position: absolute;
+            inset: 0;
+            display: flex;
+        }
+
+        .splash-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out, transform 6s ease-in-out;
+            transform: scale(1.05);
+            filter: brightness(0.2) saturate(0.5);
+        }
+
+        .splash-img.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .splash-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .splash-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            line-height: 1;
+            letter-spacing: -2px;
+            color: var(--text);
+            margin-bottom: 24px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .start-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent);
+            color: #000;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 18px 48px;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(202, 255, 74, 0.4);
+            transition: all 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 60px rgba(202, 255, 74, 0.6);
+            background: var(--text);
+        }
+
+        /* SMASH EFFECT CLASS */
+        .smash-out {
+            animation: smashAnim 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+            pointer-events: none;
+        }
+
+        @keyframes smashAnim {
+            0% { transform: scale(1); opacity: 1; filter: blur(0); }
+            40% { transform: scale(1.2); filter: blur(4px); opacity: 1; }
+            100% { transform: scale(4) rotate(15deg); opacity: 0; filter: blur(20px); display: none; }
+        }
+
+        /* ─────────── NAV ─────────── */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 60px;
+            background: rgba(5,6,5, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: 0.8s ease;
+        }
+        #app.visible .nav {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .logo { font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
+        .logo span { color: var(--accent); font-style: italic; }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* ─────────── APP CONTAINER ─────────── */
+        #app { opacity: 0; transition: opacity 0.8s 0.3s ease; }
+        #app.visible { opacity: 1; }
+
+        /* ─────────── BACKGROUND WALLPAPER ROTATOR ─────────── */
+        .page-bg-container {
+            position: fixed; inset: 0; z-index: -1;
+            overflow: hidden; pointer-events: none;
+        }
+        .page-bg {
+            position: absolute; inset: -5%;
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 2s ease-in-out, transform 10s linear;
+            transform: scale(1); filter: brightness(0.18) saturate(0.8) blur(3px);
+        }
+        .page-bg.active { opacity: 1; transform: scale(1.03); }
+
+        /* ─────────── SECTION GENERAL ─────────── */
+        .section {
+            padding: 120px 60px;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sec-label { color: var(--accent); text-transform: uppercase; font-size: 0.8rem; font-weight: 700; letter-spacing: 3px; margin-bottom: 16px; }
+        .sec-title { font-family: 'DM Serif Display', serif; font-size: clamp(2.5rem, 5vw, 4rem); letter-spacing: -1px; margin-bottom: 24px; line-height: 1.1; }
+        .sec-desc { color: var(--text-muted); max-width: 600px; font-size: 1.1rem; line-height: 1.8; margin-bottom: 60px; }
+
+        /* ─────────── PREDICTOR FORM ─────────── */
+        .form-grid {
+            background: var(--card);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 50px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            max-width: 900px;
+            margin: 0 auto;
+            transform-style: preserve-3d;
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        @media(max-width:768px) { .form-row { grid-template-columns: 1fr; gap: 20px;} }
+
+        .form-group { display: flex; flex-direction: column; gap: 10px; transform: translateZ(20px);}
+        .form-group label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; }
+
+        .input-wrap {
+            display: flex; align-items: center; background: var(--bg);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            transition: 0.2s; overflow: hidden;
+        }
+        .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(202,255,74,0.1); }
+        .input-wrap input { flex: 1; background: transparent; border: none; color: var(--text); padding: 16px 20px; font-size: 1.1rem; outline: none; font-family: inherit;}
+        .input-wrap span.unit { padding: 0 20px; color: var(--text-dim); border-left: 1px solid var(--border); font-size: 0.9rem;}
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .sel-btn {
+            background: var(--bg); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 12px 20px; border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
+            font-size: 1rem; font-weight: 500; transition: 0.2s; flex: 1; text-align: center;
+        }
+        .sel-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .sel-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; box-shadow: 0 0 20px rgba(202,255,74,0.2); }
+
+        .predict-btn {
+            width: 100%; background: var(--accent); color: #000; border: none; padding: 22px;
+            font-size: 1.2rem; font-weight: 700; border-radius: var(--radius); cursor: pointer;
+            margin-top: 20px; font-family: inherit; transition: 0.2s;
+            transform: translateZ(30px);
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        .predict-btn:hover { background: var(--text); box-shadow: 0 0 40px rgba(255,255,255,0.3); transform: translateZ(40px) scale(1.02); }
+        .predict-btn:disabled { opacity: 0.5; pointer-events: none; }
+        
+        .error-msg { display: none; color: #ff5555; background: rgba(255,85,85,0.1); border: 1px solid #ff5555; padding: 16px; border-radius: var(--radius); margin-top: 20px; font-weight: 500;}
+
+        /* ─────────── POPUP OVERLAY (THE SPECIAL OUTPUT) ─────────── */
+        .popup-overlay {
+            position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.4s ease;
+        }
+        .popup-overlay.show { opacity: 1; pointer-events: all; }
+        
+        .popup-card {
+            background: var(--card-solid); border: 1px solid var(--accent); border-radius: 32px; padding: 60px; max-width: 600px; width: 90%;
+            text-align: center; position: relative; transform: scale(0.8) translateY(50px); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 40px 100px rgba(202,255,74,0.15); overflow: hidden;
+        }
+        .popup-overlay.show .popup-card { transform: scale(1) translateY(0); }
+
+        .popup-glow { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 0%, rgba(202,255,74,0.15), transparent 60%); pointer-events: none; animation: spin 20s linear infinite;}
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .popup-eyebrow { color: var(--accent); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; margin-bottom: 20px; text-transform: uppercase;}
+        .popup-price-usd { font-family: 'DM Serif Display', serif; font-size: 5rem; color: var(--text); line-height: 1; margin-bottom: 10px; text-shadow: 0 0 40px rgba(255,255,255,0.4);}
+        .popup-price-inr { font-size: 1.5rem; color: var(--text-muted); font-weight: 500; margin-bottom: 40px;}
+        
+        .popup-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; text-align: left; }
+        .popup-detail-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 20px; border-radius: var(--radius); }
+        .pd-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;}
+        .pd-val { font-size: 1.2rem; font-weight: 600;}
+
+        .popup-close {
+            background: var(--text); color: #000; font-family: inherit; font-size: 1.1rem; font-weight: 700; border: none; padding: 18px 40px;
+            border-radius: 100px; cursor: pointer; transition: 0.2s; width: 100%;
+        }
+        .popup-close:hover { background: var(--accent); box-shadow: 0 0 30px rgba(202,255,74,0.5); }
+
+        /* ─────────── ABOUT & REVIEWS ─────────── */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 60px; align-items: center;}
+        .about-img { width: 100%; border-radius: var(--radius-lg); height: 400px; object-fit: cover; filter: brightness(0.8); border: 1px solid var(--border);}
+        
+        .reviews-container { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 40px; margin-top: 40px; scroll-snap-type: x mandatory;}
+        .reviews-container::-webkit-scrollbar { height: 8px; }
+        .reviews-container::-webkit-scrollbar-track { background: var(--border); border-radius: 10px;}
+        .reviews-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px;}
+
+        .review-card {
+            min-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px;
+            scroll-snap-align: start; backdrop-filter: blur(10px);
+        }
+        .stars { color: var(--accent); font-size: 1.4rem; margin-bottom: 20px; }
+        .review-text { font-size: 1.1rem; line-height: 1.7; font-style: italic; color: var(--text); margin-bottom: 30px;}
+        .review-author { display: flex; align-items: center; gap: 16px;}
+        .author-av { width: 50px; height: 50px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--accent);}
+        .author-info h4 { font-size: 1rem; margin-bottom: 4px;}
+        .author-info p { font-size: 0.8rem; color: var(--text-muted);}
+
+        /* ─────────── FOOTER ─────────── */
+        .footer { padding: 40px; text-align: center; border-top: 1px solid var(--border); color: var(--text-dim); margin-top: 100px; background: #000;}
+
+    </style>
+</head>
+
+<body>
+
+    <!-- 🌟 SPLASH SCREEN -->
+    <div id="splash">
+        <div class="splash-images" id="splash-images">
+            <div class="splash-img active" style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80')"></div>
+            <div class="splash-img" style="background-image: url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')"></div>
+        </div>
+        <div class="splash-content">
+            <div class="sec-label">EstateIQ Advanced AI</div>
+            <h1 class="splash-title">Predict the Future <br><span style="color:var(--accent); font-style:italic;">of Real Estate.</span></h1>
+            <button class="start-btn" onclick="smashEnter()">
+                Enter Application
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 🌠 MAIN APP -->
+    <div id="app">
+        <!-- Rotating Backgrounds for App -->
+        <div class="page-bg-container" id="bg-slider">
+            <div class="page-bg active" style="background-image: url('https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1600&q=80')"></div>
+            <div class="page-bg" style="background-image: url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1600&q=80')"></div>
+            <div class="page-bg" style="background-image: url('https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?w=1600&q=80')"></div>
+        </div>
+
+        <nav class="nav">
+            <div class="logo">Estate<span>IQ</span></div>
+            <ul class="nav-links">
+                <li><a href="#predictor">Predictor</a></li>
+                <li><a href="#about">About AI</a></li>
+                <li><a href="#reviews">Reviews</a></li>
+            </ul>
+        </nav>
+
+        <!-- 🎯 PREDICTOR SECTION -->
+        <section class="section" id="predictor">
+            <div style="text-align: center;">
+                <div class="sec-label">Gradient Boosting Machine Learning</div>
+                <h2 class="sec-title">Value Your Home Instantly</h2>
+                <p class="sec-desc" style="margin: 0 auto 60px auto;">Our robust AI pipeline crunches thousands of historical data points to predict the perfect market price in both USD and INR.</p>
+            </div>
+
+            <div class="form-grid" data-tilt data-tilt-max="2" data-tilt-speed="400" data-tilt-perspective="1000" data-tilt-glare="true" data-tilt-max-glare="0.08">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Living Area</label>
+                        <div class="input-wrap"><input id="sqft_living" type="number" placeholder="e.g. 2400"><span class="unit">SQFT</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Lot Size</label>
+                        <div class="input-wrap"><input id="sqft_lot" type="number" placeholder="e.g. 6000"><span class="unit">SQFT</span></div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Year Built</label>
+                        <div class="input-wrap"><input id="yr_built" type="number" placeholder="e.g. 1998"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bedrooms</label>
+                        <div class="btn-group" id="bedrooms-sel">
+                            <button class="sel-btn active" data-val="1" onclick="sel(this,'bedrooms-sel')">1</button>
+                            <button class="sel-btn" data-val="2" onclick="sel(this,'bedrooms-sel')">2</button>
+                            <button class="sel-btn" data-val="3" onclick="sel(this,'bedrooms-sel')">3</button>
+                            <button class="sel-btn" data-val="4" onclick="sel(this,'bedrooms-sel')">4</button>
+                            <button class="sel-btn" data-val="5" onclick="sel(this,'bedrooms-sel')">5+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Bathrooms</label>
+                        <div class="btn-group" id="bathrooms-sel">
+                            <button class="sel-btn active" data-val="1" onclick="sel(this,'bathrooms-sel')">1</button>
+                            <button class="sel-btn" data-val="2" onclick="sel(this,'bathrooms-sel')">2</button>
+                            <button class="sel-btn" data-val="3" onclick="sel(this,'bathrooms-sel')">3</button>
+                            <button class="sel-btn" data-val="4" onclick="sel(this,'bathrooms-sel')">4</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Floors</label>
+                        <div class="btn-group" id="floors-sel">
+                            <button class="sel-btn active" data-val="1" onclick="sel(this,'floors-sel')">1</button>
+                            <button class="sel-btn" data-val="1.5" onclick="sel(this,'floors-sel')">1.5</button>
+                            <button class="sel-btn" data-val="2" onclick="sel(this,'floors-sel')">2</button>
+                            <button class="sel-btn" data-val="3" onclick="sel(this,'floors-sel')">3</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <div class="btn-group" id="condition-sel">
+                            <button class="sel-btn" data-val="2" onclick="sel(this,'condition-sel')">Fair</button>
+                            <button class="sel-btn active" data-val="3" onclick="sel(this,'condition-sel')">Avg</button>
+                            <button class="sel-btn" data-val="4" onclick="sel(this,'condition-sel')">Good</button>
+                            <button class="sel-btn" data-val="5" onclick="sel(this,'condition-sel')">Excel</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>View Quality</label>
+                        <div class="btn-group" id="view-sel">
+                            <button class="sel-btn active" data-val="0" onclick="sel(this,'view-sel')">None</button>
+                            <button class="sel-btn" data-val="2" onclick="sel(this,'view-sel')">Avg</button>
+                            <button class="sel-btn" data-val="4" onclick="sel(this,'view-sel')">Excel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Waterfront Property?</label>
+                        <div class="btn-group" id="waterfront-sel">
+                            <button class="sel-btn active" data-val="0" onclick="sel(this,'waterfront-sel')">No Waterfront</button>
+                            <button class="sel-btn" data-val="1" onclick="sel(this,'waterfront-sel')">Yes, Waterfront</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="predict-btn" id="predict-btn" onclick="predict()">
+                    <span id="btn-text">Generate AI Valuation</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m2 12 5.25 5 2.625-5-2.625-5L2 12Z"/><path d="m11 12 5.25 5 2.625-5-2.625-5L11 12Z"/><path d="m22 12-5.25 5"/></svg>
+                </button>
+                <div id="error-box" class="error-msg"></div>
+            </div>
+        </section>
+
+        <!-- 📖 ABOUT SECTION -->
+        <section class="section" id="about">
+            <div class="sec-label">Under the Hood</div>
+            <h2 class="sec-title">How the AI Works</h2>
+            <div class="info-grid">
+                <div>
+                    <h3 style="font-size:1.8rem; margin-bottom:16px;">Gradient Boosting Regressor</h3>
+                    <p style="color:var(--text-muted); font-size:1.1rem; line-height:1.7; margin-bottom:24px;">
+                        Unlike standard linear models, EstateIQ implements an advanced Gradient Boosting ensemble that trains decision trees sequentially. It automatically scales your features and intelligently interprets non-linear real estate variables.
+                    </p>
+                    <ul style="list-style:none; display:flex; flex-direction:column; gap:16px;">
+                        <li style="display:flex; align-items:center; gap:12px; font-size:1.1rem;"><span style="color:var(--accent);">✔</span> High Confidence Scaling</li>
+                        <li style="display:flex; align-items:center; gap:12px; font-size:1.1rem;"><span style="color:var(--accent);">✔</span> Real-Time USD to INR Conversion</li>
+                        <li style="display:flex; align-items:center; gap:12px; font-size:1.1rem;"><span style="color:var(--accent);">✔</span> 4000+ Historical Datapoints Analyzed</li>
+                    </ul>
+                </div>
+                <img src="https://images.unsplash.com/photo-1551281434-2e9125301880?w=800&q=80" alt="Tech Home" class="about-img" data-tilt data-tilt-max="3" data-tilt-speed="400">
+            </div>
+        </section>
+
+        <!-- ⭐️ REVIEWS SECTION -->
+        <section class="section" id="reviews">
+            <div class="sec-label">Testimonials</div>
+            <h2 class="sec-title">Trusted by Homeowners</h2>
+            <div class="reviews-container">
+                
+                <div class="review-card" data-tilt data-tilt-max="4" data-tilt-glare="true" data-tilt-max-glare="0.1">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">"The predictions from EstateIQ were astonishingly close to my final appraisal. The INR conversion was entirely seamless. A brilliant tool!"</p>
+                    <div class="review-author">
+                        <div class="author-av">S</div>
+                        <div class="author-info"><h4>Sarah Jenkins</h4><p>Sold in Seattle, WA</p></div>
+                    </div>
+                </div>
+
+                <div class="review-card" data-tilt data-tilt-max="4" data-tilt-glare="true" data-tilt-max-glare="0.1">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">"As a realtor, having a fast ML tool to verify baseline pricing is incredible. The new 3D interface just feels incredibly futuristic."</p>
+                    <div class="review-author">
+                        <div class="author-av">M</div>
+                        <div class="author-info"><h4>Marcus R.</h4><p>Real Estate Agent</p></div>
+                    </div>
+                </div>
+
+                <div class="review-card" data-tilt data-tilt-max="4" data-tilt-glare="true" data-tilt-max-glare="0.1">
+                    <div class="stars">★★★★★</div>
+                    <p class="review-text">"Flawless execution! I entered my 4-bedroom layout data and the model instantly output the exact range we were targeting."</p>
+                    <div class="review-author">
+                        <div class="author-av">A</div>
+                        <div class="author-info"><h4>Arjun Patel</h4><p>Home Buyer</p></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="footer">
+            Built with <span>Powered by Advanced AI</span> &copy; 2026 EstateIQ Predictions
+        </footer>
+    </div>
+
+    <!-- ✨ SPECIAL RESULT POPUP -->
+    <div class="popup-overlay" id="result-overlay">
+        <div class="popup-card">
+            <div class="popup-glow"></div>
+            <div class="popup-eyebrow">Prediction Complete</div>
+            <div class="popup-price-usd" id="res-usd">$0</div>
+            <div class="popup-price-inr" id="res-inr">₹0</div>
+            
+            <div class="popup-details">
+                <div class="popup-detail-box">
+                    <div class="pd-label">Low Range (USD)</div>
+                    <div class="pd-val" id="res-low-usd">$0</div>
+                </div>
+                <div class="popup-detail-box">
+                    <div class="pd-label">High Range (USD)</div>
+                    <div class="pd-val" id="res-high-usd">$0</div>
+                </div>
+                <div class="popup-detail-box">
+                    <div class="pd-label">Low Range (INR)</div>
+                    <div class="pd-val" id="res-low-inr">₹0</div>
+                </div>
+                <div class="popup-detail-box">
+                    <div class="pd-label">High Range (INR)</div>
+                    <div class="pd-val" id="res-high-inr">₹0</div>
+                </div>
+            </div>
+
+            <button class="popup-close" onclick="closeResult()">Close Result</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Start SMASH Animation
+        function smashEnter() {
+            const splash = document.getElementById('splash');
+            splash.classList.add('smash-out');
+            document.getElementById('app').classList.add('visible');
+            setTimeout(()=> { splash.style.display = 'none'; }, 700);
+        }
+
+        // Cycle Wallpapers
+        function cycleBackgrounds(containerId) {
+            const bgs = document.querySelectorAll(`#${containerId} > div`);
+            let ix = 0;
+            setInterval(() => {
+                bgs[ix].classList.remove('active');
+                ix = (ix + 1) % bgs.length;
+                bgs[ix].classList.add('active');
+            }, 6000);
+        }
+        cycleBackgrounds('splash-images');
+        cycleBackgrounds('bg-slider');
+
+        // Selection Logic
+        function sel(btn, groupId) {
+            document.querySelectorAll(`#${groupId} button`).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        function getVal(groupId) {
+            const el = document.querySelector(`#${groupId} .active`);
+            return el ? el.dataset.val : "0";
+        }
+
+        // Main Predict Function
+        async function predict() {
+            const btn = document.getElementById('predict-btn');
+            const btnText = document.getElementById('btn-text');
+            const errorBox = document.getElementById('error-box');
+            
+            errorBox.style.display = 'none';
+
+            const payload = {
+                sqft_living: parseFloat(document.getElementById('sqft_living').value),
+                sqft_lot: parseFloat(document.getElementById('sqft_lot').value),
+                yr_built: parseFloat(document.getElementById('yr_built').value),
+                bedrooms: parseFloat(getVal('bedrooms-sel')),
+                bathrooms: parseFloat(getVal('bathrooms-sel')),
+                floors: parseFloat(getVal('floors-sel')),
+                condition: parseInt(getVal('condition-sel')),
+                view: parseInt(getVal('view-sel')),
+                waterfront: parseInt(getVal('waterfront-sel'))
+            };
+
+            if(isNaN(payload.sqft_living) || isNaN(payload.sqft_lot) || isNaN(payload.yr_built)) {
+                errorBox.innerHTML = '<strong>Error:</strong> Please fill in continuous data fields (SQFT and Year).';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            btnText.innerHTML = 'Processing ML Weights...';
+            btn.disabled = true;
+
+            try {
+                // FIXED ERROR: Absolute URL solves the issue if user double clicks HTML file locally!
+                const res = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if(data.error) throw new Error(data.error);
+
+                // Populate Special Popup
+                document.getElementById('res-usd').innerText = '$' + data.price_usd.toLocaleString();
+                document.getElementById('res-inr').innerText = '₹' + data.price_inr.toLocaleString();
+                
+                document.getElementById('res-low-usd').innerText = '$' + data.price_low_usd.toLocaleString();
+                document.getElementById('res-high-usd').innerText = '$' + data.price_high_usd.toLocaleString();
+                document.getElementById('res-low-inr').innerText = '₹' + data.price_low_inr.toLocaleString();
+                document.getElementById('res-high-inr').innerText = '₹' + data.price_high_inr.toLocaleString();
+
+                document.getElementById('result-overlay').classList.add('show');
+
+            } catch (err) {
+                console.error(err);
+                errorBox.innerHTML = '<strong>Connection Error:</strong> Ensure you have run <code>python app.py</code> in the terminal and Flask is active on port 5000.';
+                errorBox.style.display = 'block';
+            } finally {
+                btnText.innerHTML = 'Generate AI Valuation';
+                btn.disabled = false;
+            }
+        }
+
+        function closeResult() {
+            document.getElementById('result-overlay').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
