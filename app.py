@@ -17,6 +17,15 @@ USD_TO_INR = 83  # Approx conversion
 def index():
     return app.send_static_file('index.html')
 
+@app.route('/api/analytics')
+def get_analytics():
+    import json
+    try:
+        with open('analytics.json', 'r') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/predict', methods=['POST'])
 def predict():
