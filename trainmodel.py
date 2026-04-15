@@ -76,4 +76,7 @@ import json
 with open('analytics.json', 'w') as f:
     json.dump(analytics_payload, f)
 
+with open('model.pkl', 'wb') as f:
+    pickle.dump(pipeline, f)
+
 print("Advanced pipeline saved to model.pkl and analytics.json saved!")

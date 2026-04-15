@@ -15,8 +15,9 @@ env/
 .venv/
 .env/
 
-# Trained model (regenerate locally with trainmodel.py)
+# Trained model + generated analytics (regenerate locally with trainmodel.py)
 model.pkl
+analytics.json
 
 # IDE / OS
 .vscode/

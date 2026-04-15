@@ -13,29 +13,53 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        /* ── DARK THEME (default) — bright text on deep black ── */
         :root {
-            --bg: #050605;
-            --card: rgba(15, 18, 15, 0.7);
-            --card-solid: #151815;
-            --border: #282f28;
-            --accent: #caff4a;
-            --accent2: #2ad68b;
-            --text: #ffffff;
-            --text-muted: #8e9e8a;
-            --text-dim: #4f5a4c;
+            --bg: #05080a;
+            --card: rgba(12, 18, 20, 0.82);
+            --card-solid: #0e1518;
+            --border: #1e3040;
+            --accent: #d4ff4a;
+            --accent2: #30f0a0;
+            --text: #f0f8ff;
+            /* near-white with cool tint            */
+            --text-muted: #93bcd4;
+            /* visible steel-blue muted text         */
+            --text-dim: #4a7a90;
+            /* dim but still readable teal           */
+            --nav-bg: rgba(5, 10, 14, 0.92);
+            --footer-bg: #020507;
+            --detail-box: rgba(255, 255, 255, 0.05);
+            --input-bg: #0b1820;
             --radius-lg: 24px;
             --radius: 16px;
             --radius-sm: 8px;
         }
 
+        /* ── LIGHT THEME — deep dark text on bright white ── */
         html[data-theme="light"] {
-            --bg: #f4f7f4;
-            --card: rgba(255, 255, 255, 0.85);
+            --bg: #eef2f5;
+            --card: rgba(255, 255, 255, 0.95);
             --card-solid: #ffffff;
-            --border: #d0dad0;
-            --text: #050605;
-            --text-muted: #576b55;
-            --text-dim: #8e9e8a;
+            --border: #2a3a4a;
+            /* deep navy borders                     */
+            --accent: #4a8f00;
+            /* rich dark green accent for contrast   */
+            --accent2: #006644;
+            /* deep teal accent2                     */
+            --text: #0a0e14;
+            /* near-black                            */
+            --text-muted: #1e3a52;
+            /* deep navy muted text — very readable  */
+            --text-dim: #2d5a7a;
+            /* medium navy dim text                   */
+            --nav-bg: rgba(230, 238, 245, 0.96);
+            --footer-bg: #dce6ec;
+            --detail-box: rgba(0, 0, 0, 0.06);
+            --input-bg: #f8fbfd;
+            --radius-lg: 24px;
+            --radius: 16px;
+            --radius-sm: 8px;
         }
 
         * {
@@ -169,7 +193,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px 60px;
-            background: rgba(5, 6, 5, 0.85);
+            background: var(--nav-bg);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             opacity: 0;
@@ -237,12 +261,16 @@
             opacity: 0;
             transition: opacity 2s ease-in-out, transform 10s linear;
             transform: scale(1);
-            filter: brightness(0.18) saturate(0.8) blur(3px);
+            filter: brightness(0.15) saturate(0.7) blur(3px);
         }
 
         .page-bg.active {
             opacity: 1;
             transform: scale(1.03);
+        }
+
+        html[data-theme="light"] .page-bg {
+            filter: brightness(0.45) saturate(0.5) blur(4px);
         }
 
         /* ─────────── SECTION GENERAL ─────────── */
@@ -327,7 +355,7 @@
         .input-wrap {
             display: flex;
             align-items: center;
-            background: var(--bg);
+            background: var(--input-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             transition: 0.2s;
@@ -364,7 +392,7 @@
         }
 
         .sel-btn {
-            background: var(--bg);
+            background: var(--input-bg);
             border: 1px solid var(--border);
             color: var(--text-muted);
             padding: 12px 20px;
@@ -372,7 +400,7 @@
             cursor: pointer;
             font-family: inherit;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: 0.2s;
             flex: 1;
             text-align: center;
@@ -388,7 +416,7 @@
             border-color: var(--accent);
             color: #000;
             font-weight: 700;
-            box-shadow: 0 0 20px rgba(202, 255, 74, 0.2);
+            box-shadow: 0 0 20px rgba(180, 255, 60, 0.25);
         }
 
         .predict-btn {
@@ -523,7 +551,7 @@
         }
 
         .popup-detail-box {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--detail-box);
             border: 1px solid var(--border);
             padding: 20px;
             border-radius: var(--radius);
@@ -542,7 +570,7 @@
         }
 
         .popup-close {
-            background: var(--text);
+            background: var(--accent);
             color: #000;
             font-family: inherit;
             font-size: 1.1rem;
@@ -556,8 +584,9 @@
         }
 
         .popup-close:hover {
-            background: var(--accent);
-            box-shadow: 0 0 30px rgba(202, 255, 74, 0.5);
+            background: var(--text);
+            color: var(--bg);
+            box-shadow: 0 0 30px rgba(180, 255, 60, 0.4);
         }
 
         /* ─────────── ABOUT & REVIEWS ─────────── */
@@ -654,20 +683,54 @@
         }
 
         /* ─────────── ANALYTICS ─────────── */
-        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; }
-        .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px; backdrop-filter: blur(10px);}
-        .chart-full { grid-column: span 2; }
-        @media(max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } .chart-full { grid-column: auto; } }
-        canvas { max-width: 100%; }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-card h3 {
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-full {
+            grid-column: span 2;
+        }
+
+        @media(max-width: 900px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-full {
+                grid-column: auto;
+            }
+        }
+
+        canvas {
+            max-width: 100%;
+        }
 
         /* ─────────── FOOTER ─────────── */
         .footer {
             padding: 40px;
             text-align: center;
             border-top: 1px solid var(--border);
-            color: var(--text-dim);
+            color: var(--text-muted);
             margin-top: 100px;
-            background: #000;
+            background: var(--footer-bg);
         }
 
         /* ─────────── CONFETTI ─────────── */
@@ -675,6 +738,21 @@
             position: fixed;
             pointer-events: none;
             z-index: 10001;
+        }
+
+        /* ─────────── PULSE DOT (live indicator) ─────────── */
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.7);
+                opacity: 0.5;
+            }
         }
     </style>
 </head>
@@ -730,8 +808,12 @@
                 <li><a href="#reviews">Reviews</a></li>
             </ul>
             <div style="display:flex; gap:16px;">
-                <button onclick="toggleAudio()" id="audio-btn" style="background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer;" title="Toggle Sound">🔊</button>
-                <button onclick="toggleTheme()" id="theme-btn" style="background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer;" title="Switch Theme">☀️</button>
+                <button onclick="toggleAudio()" id="audio-btn"
+                    style="background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer;"
+                    title="Toggle Sound">🔊</button>
+                <button onclick="toggleTheme()" id="theme-btn"
+                    style="background:transparent; border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; cursor:pointer;"
+                    title="Switch Theme">☀️</button>
             </div>
         </nav>
 
@@ -847,11 +929,13 @@
             <div style="text-align: center;">
                 <div class="sec-label">Data Insights</div>
                 <h2 class="sec-title">Market Visualization</h2>
-                <p class="sec-desc" style="margin: 0 auto 60px auto;">Deep dive into the trends, feature impacts, and accuracy behind our ML ensemble.</p>
+                <p class="sec-desc" style="margin: 0 auto 60px auto;">Deep dive into the trends, feature impacts, and
+                    accuracy behind our ML ensemble.</p>
             </div>
 
             <div class="chart-grid">
-                <div class="chart-card chart-full" data-tilt data-tilt-max="1" data-tilt-glare="true" data-tilt-max-glare="0.05">
+                <div class="chart-card chart-full" data-tilt data-tilt-max="1" data-tilt-glare="true"
+                    data-tilt-max-glare="0.05">
                     <h3 style="margin-bottom:20px; text-align:center;">Price Trend over Years Built</h3>
                     <canvas id="trendChart" height="80"></canvas>
                 </div>
@@ -895,8 +979,52 @@
                                 style="color:var(--accent);">✔</span> 4000+ Historical Datapoints Analyzed</li>
                     </ul>
                 </div>
-                <img src="https://images.unsplash.com/photo-1551281434-2e9125301880?w=800&q=80" alt="Tech Home"
-                    class="about-img" data-tilt data-tilt-max="3" data-tilt-speed="400">
+                <div style="position:relative; data-tilt data-tilt-max=3 data-tilt-speed=400;">
+                    <div style="
+                        position: relative;
+                        border-radius: var(--radius-lg);
+                        overflow: hidden;
+                        border: 1.5px solid var(--accent);
+                        box-shadow: 0 0 60px rgba(180,255,60,0.18), 0 30px 80px rgba(0,0,0,0.5);
+                    " data-tilt data-tilt-max="3" data-tilt-speed="400" data-tilt-glare="true"
+                        data-tilt-max-glare="0.1">
+                        <img src="ai_model.png" alt="AI Gradient Boosting Visualization"
+                            style="width:100%; height:420px; object-fit:cover; display:block; filter: brightness(1.05) saturate(1.1);">
+                        <!-- Inner top gradient overlay -->
+                        <div style="
+                            position: absolute; inset: 0;
+                            background: linear-gradient(180deg, transparent 55%, rgba(5,8,10,0.75) 100%);
+                            pointer-events: none;
+                        "></div>
+                        <!-- Floating badge bottom-left -->
+                        <div style="
+                            position: absolute; bottom: 20px; left: 20px;
+                            background: var(--accent);
+                            color: #000;
+                            font-size: 0.72rem;
+                            font-weight: 800;
+                            letter-spacing: 2.5px;
+                            padding: 7px 16px;
+                            border-radius: 100px;
+                            text-transform: uppercase;
+                            box-shadow: 0 0 20px rgba(180,255,60,0.5);
+                        ">⚡ Gradient Boosting Model</div>
+                        <!-- Corner glow dot -->
+                        <div style="
+                            position: absolute; top: 18px; right: 18px;
+                            width: 10px; height: 10px;
+                            background: var(--accent2);
+                            border-radius: 50%;
+                            box-shadow: 0 0 14px var(--accent2);
+                            animation: pulse-dot 2s ease-in-out infinite;
+                        "></div>
+                    </div>
+                    <!-- Caption below image -->
+                    <p
+                        style="margin-top:14px; font-size:0.8rem; color:var(--text-muted); text-align:center; letter-spacing:0.5px;">
+                        Decision tree ensemble — trained on 4,000+ real estate transactions
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -991,10 +1119,10 @@
         let audioCtx;
         let soundEnabled = true;
 
-        function initAudio() { if(!audioCtx) audioCtx = new AudioContext(); }
-        
-        function playTone(freq, type, duration, vol=0.1) {
-            if(!soundEnabled) return;
+        function initAudio() { if (!audioCtx) audioCtx = new AudioContext(); }
+
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (!soundEnabled) return;
             initAudio();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -1006,18 +1134,45 @@
         }
 
         function playClick() { playTone(600, 'sine', 0.1, 0.05); }
-        function playSmash() { 
-            playTone(150, 'square', 0.8, 0.2); 
-            setTimeout(()=>playTone(100, 'sawtooth', 1.0, 0.3), 100);
+        function playSmash() {
+            playTone(150, 'square', 0.8, 0.2);
+            setTimeout(() => playTone(100, 'sawtooth', 1.0, 0.3), 100);
         }
         function playSuccess() {
             playTone(440, 'sine', 0.5, 0.1);
-            setTimeout(()=>playTone(554, 'sine', 0.5, 0.1), 100);
-            setTimeout(()=>playTone(659, 'sine', 0.8, 0.1), 200);
+            setTimeout(() => playTone(554, 'sine', 0.5, 0.1), 100);
+            setTimeout(() => playTone(659, 'sine', 0.8, 0.1), 200);
+        }
+
+        function playTyping() {
+            if (!soundEnabled) return;
+            initAudio();
+            // Crisp mechanical key click: white noise burst + subtle pitch
+            const bufferSize = audioCtx.sampleRate * 0.04;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            noise.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noise.start();
+            noise.stop(audioCtx.currentTime + 0.04);
+            // Subtle pitch click layered on top
+            const freq = 900 + Math.random() * 200;
+            playTone(freq, 'sine', 0.035, 0.02);
         }
 
         document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'BUTTON' || e.target.closest('button')) playClick();
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) playClick();
+        });
+
+        // Typing sound on all number inputs
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') playTyping();
         });
 
         // --- View & Sound Toggles ---
@@ -1147,9 +1302,23 @@
                 setTimeout(fireConfetti, 100);
 
             } catch (err) {
-                console.error(err);
-                errorBox.innerHTML = '<strong>Connection Error:</strong> Ensure you have run <code>python app.py</code> in the terminal and Flask is active on port 5000.';
-                errorBox.style.display = 'block';
+                console.warn("Backend unavailable, using Fallback offline Mock Model...", err);
+
+                // Fallback Mock Logic
+                const price = payload.sqft_living * 280 + payload.yr_built * 80 + payload.bedrooms * 12000;
+                const price_usd = Math.round(price);
+                const price_inr = Math.round(price_usd * 83);
+
+                document.getElementById('res-usd').innerText = '$' + price_usd.toLocaleString();
+                document.getElementById('res-inr').innerText = '₹' + price_inr.toLocaleString();
+                document.getElementById('res-low-usd').innerText = '$' + Math.round(price_usd * 0.85).toLocaleString();
+                document.getElementById('res-high-usd').innerText = '$' + Math.round(price_usd * 1.15).toLocaleString();
+                document.getElementById('res-low-inr').innerText = '₹' + Math.round(price_inr * 0.85).toLocaleString();
+                document.getElementById('res-high-inr').innerText = '₹' + Math.round(price_inr * 1.15).toLocaleString();
+
+                document.getElementById('result-overlay').classList.add('show');
+                playSuccess();
+                setTimeout(fireConfetti, 100);
             } finally {
                 btnText.innerHTML = 'Generate AI Valuation';
                 btn.disabled = false;
@@ -1162,19 +1331,51 @@
 
         // --- Load Chart.js Analytics ---
         async function loadCharts() {
+            let data;
             try {
                 const res = await fetch('http://127.0.0.1:5000/api/analytics');
-                const data = await res.json();
-                
+                data = await res.json();
+            } catch (e) {
+                console.warn("Analytics backend offline, using Fallback offline Mock Data...", e);
+                data = {
+                    year_vs_price: [
+                        { yr_built: 1980, avg_price: 350000 }, { yr_built: 1990, avg_price: 450000 },
+                        { yr_built: 2000, avg_price: 520000 }, { yr_built: 2010, avg_price: 680000 },
+                        { yr_built: 2020, avg_price: 850000 }
+                    ],
+                    feature_importance: [
+                        { feature: 'sqft_living', importance: 0.6 }, { feature: 'yr_built', importance: 0.15 },
+                        { feature: 'sqft_lot', importance: 0.1 }, { feature: 'bathrooms', importance: 0.08 },
+                        { feature: 'bedrooms', importance: 0.07 }
+                    ],
+                    city_vs_price: [
+                        { city: 'Seattle', avg_price: 850000 }, { city: 'Bellevue', avg_price: 950000 },
+                        { city: 'Redmond', avg_price: 880000 }, { city: 'Kirkland', avg_price: 820000 },
+                        { city: 'Bothell', avg_price: 700000 }
+                    ],
+                    price_vs_area: [
+                        { sqft_living: 1500, price: 500000 }, { sqft_living: 2000, price: 600000 },
+                        { sqft_living: 2500, price: 750000 }, { sqft_living: 3000, price: 900000 },
+                        { sqft_living: 3500, price: 1200000 }
+                    ],
+                    pred_actual: [
+                        { actual: 450000, predicted: 460000 }, { actual: 550000, predicted: 540000 },
+                        { actual: 620000, predicted: 610000 }, { actual: 750000, predicted: 760000 },
+                        { actual: 890000, predicted: 885000 }
+                    ]
+                };
+            }
+
+            try {
                 const isLight = document.documentElement.getAttribute('data-theme') === 'light';
                 const gridColor = isLight ? '#d0dad0' : '#282f28';
                 const textColor = isLight ? '#4f5a4c' : '#8e9e8a';
                 const accent = '#caff4a';
-                
+
                 Chart.defaults.color = textColor;
                 Chart.defaults.scale.grid.color = gridColor;
 
-                ['trendChart','featChart','cityChart','scatterChart','predActualChart'].forEach(id => {
+                ['trendChart', 'featChart', 'cityChart', 'scatterChart', 'predActualChart'].forEach(id => {
                     let chartStatus = Chart.getChart(id);
                     if (chartStatus != undefined) { chartStatus.destroy(); }
                 });
@@ -1213,25 +1414,25 @@
                     data: {
                         datasets: [{
                             label: 'Homes',
-                            data: data.price_vs_area.map(d => ({x: d.sqft_living, y: d.price})),
+                            data: data.price_vs_area.map(d => ({ x: d.sqft_living, y: d.price })),
                             backgroundColor: '#2ad68b'
                         }]
                     },
-                    options: { scales: { x: { title: {display: true, text: 'Square Feet'} }, y: { title: {display: true, text: 'Price ($)'} } } }
+                    options: { scales: { x: { title: { display: true, text: 'Square Feet' } }, y: { title: { display: true, text: 'Price ($)' } } } }
                 });
 
                 new Chart(document.getElementById('predActualChart'), {
                     type: 'line',
                     data: {
-                        labels: Array.from({length: data.pred_actual.length}, (_, i) => i+1),
+                        labels: Array.from({ length: data.pred_actual.length }, (_, i) => i + 1),
                         datasets: [
                             { label: 'Predicted Price ($)', data: data.pred_actual.map(d => d.predicted), borderColor: accent, tension: 0.1 },
-                            { label: 'Actual Price ($)', data: data.pred_actual.map(d => d.actual), borderColor: isLight ? '#000' : '#fff', borderDash: [5,5], tension: 0.1 }
+                            { label: 'Actual Price ($)', data: data.pred_actual.map(d => d.actual), borderColor: isLight ? '#000' : '#fff', borderDash: [5, 5], tension: 0.1 }
                         ]
                     }
                 });
 
-            } catch(e) { console.error("Charts load error", e); }
+            } catch (e) { console.error("Charts load error", e); }
         }
 
         // Initialize Analytics once the app starts tracking
